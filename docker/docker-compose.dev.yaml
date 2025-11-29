@@ -1,0 +1,47 @@
+services:
+# docker-compose.yml
+  traefik:
+    image: traefik:v3.6
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+      - "--entrypoints.web.address=:8088"
+    ports:
+      - "8088:8088"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  frontend:
+    build: 
+      context: ../
+      dockerfile: docker/Dockerfile.dev-frontend
+    develop:
+      watch:
+        - action: sync
+          path: ../frontend/super-eureka
+          target: /frontend
+          initial_sync: true
+          ignore:
+            - node_modules
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`eureka.localhost`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+
+  backend:
+    build: 
+      context: ../
+      dockerfile: docker/Dockerfile.dev-go
+    develop:
+      watch:
+        - action: rebuild
+          path: ..
+          ignore: frontend
+          
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`eureka.localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=web"
+  

@@ -2,4 +2,4 @@ services:
   test:
     build: 
       context: .
-      dockerfile: Dockerfile.go-test
+      dockerfile: docker/Dockerfile.go-test
