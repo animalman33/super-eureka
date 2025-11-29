@@ -1,7 +1,9 @@
 package main
 
-import "github.com/animalman33/super-eureka/internal/auth"
+import (
+	"github.com/animalman33/super-eureka/internal/routing"
+)
 
 func main() {
-	auth.Print()
+	routing.StartServer()
 }
