@@ -34,10 +34,12 @@ services:
     build: 
       context: ../
       dockerfile: docker/Dockerfile.dev-go
+    environment:
+      - BASE_URL=/dev
     develop:
       watch:
         - action: rebuild
-          path: ..
+          path: ../internal
           ignore: 
             - frontend
             - docker

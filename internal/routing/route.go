@@ -1,28 +1,25 @@
 package routing
 
 import (
-	"fmt"
 	"log"
-	"log/slog"
-	"net/http"
+	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
-const URL_PREFIX = "/api/v0"
+var URL_PREFIX = os.Getenv("BASE_URL")
 
 func StartServer() {
+	router := gin.Default()
+	router.SetTrustedProxies(nil)
+	//router.TrustedPlatform = gin.PlatformCloudflare
 
-	addApiURL("/", HelloWorld)
+	{
+		apiGroup := router.Group("/api" + URL_PREFIX)
+		apiGroup.GET("/health", HealthCheck)
+	}
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func addApiURL(url string, callback func(w http.ResponseWriter, r *http.Request)) {
-	http.HandleFunc(URL_PREFIX+url, func(w http.ResponseWriter, r *http.Request) {
-		slog.Info(fmt.Sprintf("%s Request at %s", r.Method, URL_PREFIX+url))
-		callback(w, r)
-	})
-}
-
-func HelloWorld(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
+	if err := router.Run(); err != nil {
+		log.Fatalf("failed to run server: %v", err)
+	}
 }
